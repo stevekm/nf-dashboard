@@ -1,31 +1,17 @@
 var express = require('express');
-
 var app = express();
+var bodyParser = require('body-parser')
 
-app.all('*', function (req, res, next) {
+// parse application/json
+app.use(bodyParser.json())
 
-    var output = [
-        req.baseUrl,
-        req.body,
-        req.cookies,
-        req.hostname,
-        req.ip,
-        req.method,
-        req.params,
-        req.path,
-        req.protocol,
-        req.query,
-        req.route,
-        req.stale,
-        req.secure,
-        req.subdomains,
-        req.headers,
-    ];
+app.post('/', function(req, res) {
+   // print to console
+   console.log(req.body);
 
-    res.send(JSON.stringify(output, null, 2));
-
-    console.log(output);
-})
+   // just call res.end(), or show as string on web
+   res.send(JSON.stringify(req.body, null, 4));
+});
 
 const port = 5000;
 app.listen(port);

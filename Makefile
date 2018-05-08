@@ -24,13 +24,13 @@ test:
 	./launch.sh run main.nf
 
 launch:
-	output_file="output.$$(date +%s).json" ; \
+	@output_file="output.$$(date +%s).json" ; \
 	node nflisten.js > "$${output_file}" & \
 	pid="$$!" ; \
 	echo ">>> process $${pid} outputting to file: $${output_file}" ; \
 	( cd nfbroadcast && \
 	./launch.sh run main.nf -with-messages http://localhost:5000 ; ) ; \
-	echo ">>> killing process $${pid}" ; \
+	echo ">>> killing process $${pid}; output file: $${output_file}" ; \
 	kill "$${pid}"
 
 clean:
