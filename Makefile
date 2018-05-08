@@ -19,6 +19,19 @@ nfbroadcast/nextflow.config: nfbroadcast
 
 setup: nfbroadcast nfbroadcast/main.nf nfbroadcast/nextflow.config
 
-launch:
+test:
 	cd nfbroadcast && \
-	./launch.sh run main.nf -with-messages http://localhost:5000
+	./launch.sh run main.nf
+
+launch:
+	output_file="output.$$(date +%s).json" ; \
+	node nflisten.js > "$${output_file}" & \
+	pid="$$!" ; \
+	echo ">>> process $${pid} outputting to file: $${output_file}" ; \
+	( cd nfbroadcast && \
+	./launch.sh run main.nf -with-messages http://localhost:5000 ; ) ; \
+	echo ">>> killing process $${pid}" ; \
+	kill "$${pid}"
+
+clean:
+	rm -f output.*.json

@@ -1,1 +1,3 @@
 nfbroadcast
+node_modules
+output.*.json

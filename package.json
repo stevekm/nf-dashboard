@@ -1,0 +1,19 @@
+{
+  "name": "nflistener",
+  "version": "1.0.0",
+  "description": "",
+  "main": "nflisten.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://stevekm@bitbucket.org/stevekm/nflistener.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/stevekm/nflistener#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}
