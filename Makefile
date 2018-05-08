@@ -1,5 +1,5 @@
 
-all: setup
+all: install
 
 # ~~~~~~~~ #
 nfbroadcast:
@@ -17,7 +17,8 @@ nfbroadcast/nextflow.config: nfbroadcast
 	cd nfbroadcast && \
 	ln -s ../nf-script/nextflow.config
 
-setup: nfbroadcast nfbroadcast/main.nf nfbroadcast/nextflow.config
+install: nfbroadcast nfbroadcast/main.nf nfbroadcast/nextflow.config
+	npm install
 
 test:
 	cd nfbroadcast && \
