@@ -11,11 +11,11 @@ nfbroadcast:
 
 nfbroadcast/main.nf: nfbroadcast
 	cd nfbroadcast && \
-	ln -s ../nf-script/main.nf
+	ln -fs ../nf-script/main.nf
 
 nfbroadcast/nextflow.config: nfbroadcast
 	cd nfbroadcast && \
-	ln -s ../nf-script/nextflow.config
+	ln -fs ../nf-script/nextflow.config
 
 install: nfbroadcast nfbroadcast/main.nf nfbroadcast/nextflow.config
 	npm install
