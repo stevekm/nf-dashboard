@@ -1,6 +1,14 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser')
+const { Pool, Client } = require('pg')
+
+// ~~~~~~~ DATABASE ~~~~~~ //
+// clients and pools will use environment variables for connection information
+// const pool = new Pool()
+const client = new Client()
+client.connect()
+
 
 // ~~~~~~~ LISTENER ~~~~~~ //
 // parse application/json
@@ -18,6 +26,13 @@ app.post('/', function(req, res) {
     // just call res.end(), or show as string on web
     messages.push(message);
     res.send(JSON.stringify(message, null, 4));
+
+    // insert into database
+    const query = {
+        text: 'INSERT INTO messages(body) VALUES($1)',
+        values: [JSON.stringify(message, null, 4)],
+    };
+    client.query(query);
 });
 
 const port = 5000;

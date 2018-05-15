@@ -31,3 +31,5 @@ This will:
 - Java 8 and macOS/Linux with `bash` required for Nextflow
 
 - Node.js and npm (`brew install node`)
+
+- PostgresSQL (`brew install postgres`)
