@@ -28,8 +28,10 @@ This will:
 
 # Software
 
-- Java 8 and macOS/Linux with `bash` required for Nextflow
+- [Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) and macOS/Linux with `bash` required for Nextflow
 
 - Node.js and npm (`brew install node`)
 
 - PostgresSQL (`brew install postgres`)
+
+Tested on macOS 10.10 - 10.12
