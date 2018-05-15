@@ -3,6 +3,7 @@ all: install
 
 # ~~~~~~~~ #
 nfbroadcast:
+	@echo ">>> Setting up Nextflow nfbroadcast..."
 	git clone https://github.com/qbicsoftware/nextflow.git nfbroadcast && \
 	cd nfbroadcast && \
 	git checkout nfbroadcast && \
@@ -17,7 +18,8 @@ nfbroadcast/nextflow.config: nfbroadcast
 	cd nfbroadcast && \
 	ln -fs ../nf-script/nextflow.config
 
-install: nfbroadcast nfbroadcast/main.nf nfbroadcast/nextflow.config
+install: nfbroadcast nfbroadcast/main.nf nfbroadcast/nextflow.config setup-db
+	@echo ">>> Setting up Node.js libraries..."
 	npm install
 
 test:
