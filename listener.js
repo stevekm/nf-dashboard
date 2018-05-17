@@ -2,10 +2,10 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser')
 const { Pool, Client } = require('pg')
+const port = process.argv[2]; // 5000
 
 // ~~~~~~~ DATABASE ~~~~~~ //
 // clients and pools will use environment variables for connection information
-// const pool = new Pool()
 const client = new Client()
 client.connect()
 
@@ -20,9 +20,6 @@ app.post('/', function(req, res) {
     message['id'] = message_count
     message_count = message_count + 1
 
-    // print to console
-    console.log(message);
-
     // just call res.end(), or show as string on web
     messages.push(message);
     res.send(JSON.stringify(message, null, 4));
@@ -35,34 +32,4 @@ app.post('/', function(req, res) {
     client.query(query);
 });
 
-const port = 5000;
 app.listen(port);
-
-
-// ~~~~~~~ WEB SERVER ~~~~~~ //
-// viewed at http://localhost:8080
-app.set('view engine', 'ejs');
-
-// app home page
-app.get('/', function(req, res) {
-    // render `index.ejs` with the list of posts
-    res.render('index', { messages: messages })
-});
-
-
-// app message
-app.get('/message/:id', (req, res) => {
-  // find the message in the `messages` array
-  const message = messages.filter((message) => {
-    return message.id == req.params.id
-  })[0]
-
-  // render the `message.ejs` template with the message content
-  res.render('message', {
-    author: message.runName,
-    title: message.id,
-    body: JSON.stringify(message, null, 4)
-  })
-})
-
-app.listen(8080);

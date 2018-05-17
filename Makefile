@@ -1,3 +1,11 @@
+PGDIR:=/usr/local/var/postgres
+PGUSER=nflistener
+PGHOST=localhost
+PGPASSWORD=nflistener
+PGDATABASE=nflistener
+PGPORT=5433
+POSTPORT:=5000
+SERVERPORT:=8080
 
 all: install
 
@@ -20,17 +28,7 @@ nfbroadcast/nextflow.config: nfbroadcast
 install: nfbroadcast nfbroadcast/main.nf nfbroadcast/nextflow.config
 	npm install
 
-test:
-	cd nfbroadcast && \
-	./launch.sh run main.nf
-
 # start PostgresSQL with the default config location (macOS Homebrew)
-PGDIR:=/usr/local/var/postgres
-PGUSER=nflistener
-PGHOST=localhost
-PGPASSWORD=nflistener
-PGDATABASE=nflistener
-PGPORT=5433
 setup-db: stop-db
 	@echo ">>> Setting up PostgresSQL databse..."
 	-pg_ctl -D "$(PGDIR)" start
@@ -63,9 +61,43 @@ launch: check-db
 	pid="$$!" ; \
 	echo ">>> process $${pid} outputting to file: $${output_file}" ; \
 	( cd nfbroadcast && \
-	./launch.sh run main.nf -with-messages http://localhost:5000 ; ) ; \
+	./launch.sh run main.nf -with-messages http://localhost:$(POSTPORT) ; ) ; \
 	echo ">>> killing process $${pid}; output file: $${output_file}" ; \
 	kill "$${pid}"
+
+listen: check-db
+	export PGUSER="$(PGUSER)"; \
+	export PGHOST="$(PGHOST)"; \
+	export PGPASSWORD="$(PGPASSWORD)"; \
+	export PGDATABASE="$(PGDATABASE)"; \
+	export PGPORT="$(PGPORT)"; \
+	node listener.js "$(POSTPORT)" & \
+	listener_pid="$$!" ; \
+	echo ">>> Started listener with process id $${listener_pid}" ; \
+	( cd nfbroadcast && \
+	./launch.sh run main.nf -with-messages http://localhost:$(POSTPORT) ; ) ; \
+	echo ">>> Killing listener process $${listener_pid}" ; \
+	kill "$${listener_pid}"
+
+server:
+	export PGUSER="$(PGUSER)"; \
+	export PGHOST="$(PGHOST)"; \
+	export PGPASSWORD="$(PGPASSWORD)"; \
+	export PGDATABASE="$(PGDATABASE)"; \
+	export PGPORT="$(PGPORT)"; \
+	node server.js "$(SERVERPORT)" & \
+	server_pid="$$!" ; \
+	echo ">>> Starting web server process $${server_pid}, view at http://localhost:$(SERVERPORT)"
+
+test: check-db
+	export PGUSER="$(PGUSER)"; \
+	export PGHOST="$(PGHOST)"; \
+	export PGPASSWORD="$(PGPASSWORD)"; \
+	export PGDATABASE="$(PGDATABASE)"; \
+	export PGPORT="$(PGPORT)"; \
+	node
+
+
 
 clean:
 	rm -f output.*.json
