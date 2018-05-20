@@ -66,7 +66,7 @@ launch: check-db
 	kill "$${pid}"
 
 listen: check-db
-	export PGUSER="$(PGUSER)"; \
+	@export PGUSER="$(PGUSER)"; \
 	export PGHOST="$(PGHOST)"; \
 	export PGPASSWORD="$(PGPASSWORD)"; \
 	export PGDATABASE="$(PGDATABASE)"; \
@@ -80,14 +80,13 @@ listen: check-db
 	kill "$${listener_pid}"
 
 server:
-	export PGUSER="$(PGUSER)"; \
+	@export PGUSER="$(PGUSER)"; \
 	export PGHOST="$(PGHOST)"; \
 	export PGPASSWORD="$(PGPASSWORD)"; \
 	export PGDATABASE="$(PGDATABASE)"; \
 	export PGPORT="$(PGPORT)"; \
-	node server.js "$(SERVERPORT)" & \
-	server_pid="$$!" ; \
-	echo ">>> Starting web server process $${server_pid}, view at http://localhost:$(SERVERPORT)"
+	echo ">>> Starting web server, view at http://localhost:$(SERVERPORT)" ; \
+	node server.js "$(SERVERPORT)"
 
 test: check-db
 	export PGUSER="$(PGUSER)"; \

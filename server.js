@@ -17,20 +17,14 @@ app.set('view engine', 'ejs');
 // app home page
 app.get('/', function(req, res) {
 	// get the messages from the database
-	var rows;
-	client.query({text: 'SELECT body FROM messages;'}, function(err, res){
-		if (err) {
-			console.log(err.stack);
-		} else {
-			console.log("querying")
-			rows = res.rows;
-		}
-	});
-
-	console.log(rows);
-
-	// render `index.ejs` with the list of posts
-    res.render('index', { messages: rows });
+	client.query({text: 'SELECT body FROM messages;'})
+		.then(data => {
+			const rows = data.rows; // const {data} = rows;
+			return rows.map(point => point.body)
+		})
+		.then(data => {
+			res.render('index', { messages: data})
+		});
 });
 
 app.listen(port);
