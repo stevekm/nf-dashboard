@@ -17,14 +17,31 @@ app.set('view engine', 'ejs');
 // app home page
 app.get('/', function(req, res) {
 	// get the messages from the database
-	client.query({text: 'SELECT body FROM messages;'})
+	client.query({text: 'SELECT id, body FROM messages;'})
 		.then(data => {
-			const rows = data.rows; // const {data} = rows;
-			return rows.map(point => point.body)
-		})
-		.then(data => {
-			res.render('index', { messages: data})
+			res.render('index', { messages: data.rows})
 		});
+});
+// client.query({text: 'SELECT id, body FROM messages WHERE id = 1;'}).then(data => {console.log(data.rows)});
+
+// app message
+app.get('/message/:id', (req, res) => {
+  // find the message in the database
+  const query = {
+	  text: 'SELECT id, body FROM messages WHERE id = $1',
+	  values: [req.params.id],
+  };
+  client.query(query).then(data => {
+	  var id = data.rows[0].id;
+	  var message = data.rows[0].body;
+
+	  // render the `message.ejs` template with the message content
+	  res.render('message', {
+	    author: message.runName,
+	    title: message.id,
+	    body: JSON.stringify(message, null, 4)
+	});
+  });
 });
 
 app.listen(port);

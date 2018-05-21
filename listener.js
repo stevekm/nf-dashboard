@@ -14,11 +14,8 @@ client.connect()
 // parse application/json
 app.use(bodyParser.json())
 var messages = [];
-var message_count = 0
 app.post('/', function(req, res) {
     var message = req.body;
-    message['id'] = message_count
-    message_count = message_count + 1
 
     // just call res.end(), or show as string on web
     messages.push(message);
