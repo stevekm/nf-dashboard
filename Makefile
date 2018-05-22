@@ -55,6 +55,12 @@ db-contents: check-db
 db-workflows: check-db
 	psql -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -c 'SELECT DISTINCT runid,runname FROM messages;'
 
+db-dump:
+	pg_dump -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -d "$(PGDATABASE)" --format c > nflistener.dump
+
+db-restore:
+	pg_restore -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -d "$(PGDATABASE)" --no-owner nflistener.dump
+
 listen: check-db
 	@export PGUSER="$(PGUSER)"; \
 	export PGHOST="$(PGHOST)"; \
