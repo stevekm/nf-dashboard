@@ -58,7 +58,10 @@ db-workflows: check-db
 db-dump:
 	pg_dump -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -d "$(PGDATABASE)" --format c > nflistener.dump
 
-db-restore:
+nflistener.dump:
+	git checkout origin/pg_dump -- nflistener.dump
+
+db-restore: nflistener.dump
 	pg_restore -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -d "$(PGDATABASE)" --no-owner nflistener.dump
 
 listen: check-db
