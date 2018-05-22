@@ -22,6 +22,8 @@ Populate the database with test data:
 make listen
 ```
 
+- You can run this repeatedly to generate data for several workflows
+
 # Run
 
 You can start the web app with the following command:

@@ -7,20 +7,16 @@
 </head>
 
 <body>
-    <div class="container">
-            <h1>Nextflow Listener</h1>
-            <p class="lead">Messages:</p>
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="list-group">
-                  <!-- loop over messages and render them -->
-                  <% messages.forEach((message) => { %>
-                    <a href="/message/<%= message.id %>" class="list-group-item">
-                      <h4 class="list-group-item-heading"><%= message.id %> : <%= message.body.runStatus %></h4>
-                    </a>
-                  <% }) %>
-                </div>
-            </div>
+    <div>
+        <h1>Nextflow Listener</h1>
+        <p>Workflows:</p>
+        <div >
+          <!-- loop over runs and render them -->
+          <% runs.forEach((run) => { %>
+            <a href="/workflow/<%= run.runid %>">
+                <h4>[<%= run.runname %>] <%= run.runid %></h4>
+            </a>
+          <% }) %>
         </div>
     </div>
 </body>

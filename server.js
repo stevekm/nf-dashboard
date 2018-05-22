@@ -16,13 +16,29 @@ app.set('view engine', 'ejs');
 
 // app home page
 app.get('/', function(req, res) {
-	// get the messages from the database
-	client.query({text: 'SELECT id, body FROM messages;'})
+	// get all the workflows in the database
+	client.query('SELECT DISTINCT runid,runname FROM messages;')
 		.then(data => {
-			res.render('index', { messages: data.rows})
+			return(data.rows)
+		})
+		.then(runs => {
+			res.render('index', { runs: runs})
+		});
+
+});
+
+// workflow page
+app.get('/workflow/:runid', function(req, res) {
+	// get the messages for a specific workflow
+	const query = {
+		text: 'SELECT * from messages WHERE runid = $1',
+		values: [req.params.runid]
+	};
+	client.query(query)
+		.then(data => {
+			res.render('workflow', { messages: data.rows, runid: req.params.runid})
 		});
 });
-// client.query({text: 'SELECT id, body FROM messages WHERE id = 1;'}).then(data => {console.log(data.rows)});
 
 // app message
 app.get('/message/:id', (req, res) => {

@@ -53,7 +53,7 @@ db-contents: check-db
 	psql -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -c 'SELECT * FROM messages;'
 
 db-workflows: check-db
-	psql -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -c 'SELECT DISTINCT runID FROM messages;'
+	psql -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -c 'SELECT DISTINCT runid,runname FROM messages;'
 
 listen: check-db
 	@export PGUSER="$(PGUSER)"; \
