@@ -6,6 +6,10 @@ GRANT ALL PRIVILEGES ON DATABASE nflistener TO nflistener;
 \c nflistener;
 CREATE TABLE messages (
   ID SERIAL PRIMARY KEY,
+  runID TEXT,
+  runName TEXT,
+  runStatus TEXT,
+  utcTime TEXT,
   body JSON
 );
 GRANT ALL PRIVILEGES ON TABLE messages TO nflistener;
