@@ -50,6 +50,9 @@ check-db: stop-db
 db-contents: check-db
 	psql -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -c 'SELECT * FROM messages;'
 
+db-workflows: check-db
+	psql -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -c 'SELECT DISTINCT runID FROM messages;'
+
 launch: check-db
 	export PGUSER="$(PGUSER)"; \
 	export PGHOST="$(PGHOST)"; \

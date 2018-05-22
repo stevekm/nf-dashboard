@@ -16,6 +16,10 @@ app.use(bodyParser.json())
 var messages = [];
 app.post('/', function(req, res) {
     var message = req.body;
+    var runId = message.runId;
+    var runName = message.runName;
+    var runStatus = message.runStatus;
+    var utcTime = message.utcTime;
 
     // just call res.end(), or show as string on web
     messages.push(message);
@@ -23,8 +27,8 @@ app.post('/', function(req, res) {
 
     // insert into database
     const query = {
-        text: 'INSERT INTO messages(body) VALUES($1)',
-        values: [JSON.stringify(message, null, 4)],
+        text: 'INSERT INTO messages(runId, runName, runStatus, utcTime, body) VALUES($1,$2,$3,$4,$5)',
+        values: [runId, runName, runStatus, utcTime, JSON.stringify(message, null, 4)],
     };
     client.query(query);
 });
