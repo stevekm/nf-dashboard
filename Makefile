@@ -55,21 +55,6 @@ db-contents: check-db
 db-workflows: check-db
 	psql -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -c 'SELECT DISTINCT runID FROM messages;'
 
-launch: check-db
-	export PGUSER="$(PGUSER)"; \
-	export PGHOST="$(PGHOST)"; \
-	export PGPASSWORD="$(PGPASSWORD)"; \
-	export PGDATABASE="$(PGDATABASE)"; \
-	export PGPORT="$(PGPORT)"; \
-	output_file="output.$$(date +%s).json" ; \
-	node nflisten.js > "$${output_file}" & \
-	pid="$$!" ; \
-	echo ">>> process $${pid} outputting to file: $${output_file}" ; \
-	( cd nfbroadcast && \
-	./launch.sh run main.nf -with-messages http://localhost:$(POSTPORT) ; ) ; \
-	echo ">>> killing process $${pid}; output file: $${output_file}" ; \
-	kill "$${pid}"
-
 listen: check-db
 	@export PGUSER="$(PGUSER)"; \
 	export PGHOST="$(PGHOST)"; \

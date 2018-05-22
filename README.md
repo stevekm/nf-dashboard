@@ -10,21 +10,27 @@ cd nflistener
 make install
 ```
 
+(Re)initialize the PostgresSQL database for the app:
+
+```
+make setup-db
+```
+
+Populate the database with test data:
+
+```
+make listen
+```
+
 # Run
 
-You can run the test app with the following command:
+You can start the web app with the following command:
 
 ```
-make launch
+make server
 ```
 
-This will:
-
-- start the listener app, forwarding stdout to a file
-
-- start the demo Nextflow pipeline
-
-- capture JSON output from the Nextflow pipeline in the output file
+The app will be viewable in your web browser at http://localhost:8080
 
 # Software
 
