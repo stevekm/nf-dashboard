@@ -13,7 +13,6 @@ client.connect()
 // ~~~~~~~ LISTENER ~~~~~~ //
 // parse application/json
 app.use(bodyParser.json())
-var messages = [];
 app.post('/', function(req, res) {
     var message = req.body;
     var runId = message.runId;
@@ -22,7 +21,6 @@ app.post('/', function(req, res) {
     var utcTime = message.utcTime;
 
     // just call res.end(), or show as string on web
-    messages.push(message);
     res.send(JSON.stringify(message, null, 4));
 
     // insert into database
