@@ -1,12 +1,12 @@
-# nflistener
+# NF-Dashboard
 
-Web server app to listen for HTTP POST messages output by Nextflow ([qbicsoftware](https://github.com/qbicsoftware/nextflow.git) `nfbroadcast` branch)
+Web server app to track Nextflow workflow status messages and display them in a web dashboard.
 
 # Install
 
 ```
-git clone https://github.com/stevekm/nflistener.git
-cd nflistener
+git clone https://github.com/stevekm/nf-dashboard.git
+cd nf-dashboard
 make install
 ```
 
@@ -16,7 +16,7 @@ make install
 make setup-db
 ```
 
-Populate the database with test data:
+Populate the database with test data (HTTP POST messages from Nextflow):
 
 ```
 make listen

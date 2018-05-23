@@ -15,7 +15,6 @@ nfbroadcast:
 	git clone https://github.com/qbicsoftware/nextflow.git nfbroadcast && \
 	cd nfbroadcast && \
 	git checkout nfbroadcast && \
-	git checkout 17dd2d54ba8194b774c870c00c5fd054d6bfb53b && \
 	make
 
 nfbroadcast/main.nf: nfbroadcast
@@ -74,7 +73,7 @@ listen: check-db
 	listener_pid="$$!" ; \
 	echo ">>> Started listener with process id $${listener_pid}" ; \
 	( cd nfbroadcast && \
-	./launch.sh run main.nf -with-messages http://localhost:$(POSTPORT) ; ) ; \
+	./launch.sh run main.nf -with-weblog http://localhost:$(POSTPORT) ; ) ; \
 	echo ">>> Killing listener process $${listener_pid}" ; \
 	kill "$${listener_pid}"
 
