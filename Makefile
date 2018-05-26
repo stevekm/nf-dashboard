@@ -4,8 +4,10 @@ PGHOST=localhost
 PGPASSWORD=nflistener
 PGDATABASE=nflistener
 PGPORT=5433
-POSTPORT:=5000
+APIPORT:=5000
+APIURL:=http://localhost
 SERVERPORT:=8080
+.PHONY: test
 
 all: install
 
@@ -34,7 +36,7 @@ setup-db: stop-db
 	@echo ">>> Setting up PostgresSQL databse..."
 	-pg_ctl -D "$(PGDIR)" start
 	-createdb
-	psql -f nflistener.sql
+	psql -f database.sql
 	pg_ctl -D "$(PGDIR)" stop
 	pg_ctl -D "$(PGDIR)" -o "-p $(PGPORT)" -U "$(PGUSER)" start
 
@@ -69,13 +71,14 @@ listen: check-db
 	export PGPASSWORD="$(PGPASSWORD)"; \
 	export PGDATABASE="$(PGDATABASE)"; \
 	export PGPORT="$(PGPORT)"; \
-	node listener.js "$(POSTPORT)" & \
-	listener_pid="$$!" ; \
-	echo ">>> Started listener with process id $${listener_pid}" ; \
+	node api.js "$(APIPORT)" & \
+	pid="$$!" ; \
+	echo ">>> Started API listening with process id $${pid}" ; \
+	echo ">>> Starting Nextflow process" ; \
 	( cd nfbroadcast && \
-	./launch.sh run main.nf -with-weblog http://localhost:$(POSTPORT) ; ) ; \
-	echo ">>> Killing listener process $${listener_pid}" ; \
-	kill "$${listener_pid}"
+	./launch.sh run main.nf -with-weblog "http://localhost:$(APIPORT)/message" ; ) ; \
+	echo ">>> Killing API process $${pid}" ; \
+	kill "$${pid}"
 
 server:
 	@export PGUSER="$(PGUSER)"; \
@@ -84,9 +87,9 @@ server:
 	export PGDATABASE="$(PGDATABASE)"; \
 	export PGPORT="$(PGPORT)"; \
 	echo ">>> Starting web server, view at http://localhost:$(SERVERPORT)" ; \
-	node server.js "$(SERVERPORT)"
+	node server.js "$(SERVERPORT)" "$(APIURL)" "$(APIPORT)"
 
-test: check-db
+node: check-db
 	export PGUSER="$(PGUSER)"; \
 	export PGHOST="$(PGHOST)"; \
 	export PGPASSWORD="$(PGPASSWORD)"; \
@@ -94,7 +97,31 @@ test: check-db
 	export PGPORT="$(PGPORT)"; \
 	node
 
+api: check-db
+	export PGUSER="$(PGUSER)"; \
+	export PGHOST="$(PGHOST)"; \
+	export PGPASSWORD="$(PGPASSWORD)"; \
+	export PGDATABASE="$(PGDATABASE)"; \
+	export PGPORT="$(PGPORT)"; \
+	node api.js "$(APIPORT)"
 
+DATAFILE:=test/data.json
+post-message:
+	curl -d '@$(DATAFILE)' -H "Content-Type: application/json" -X POST "http://localhost:$(APIPORT)/message/"
+
+POST:=1
+get-message:
+	curl -X GET "http://localhost:$(APIPORT)/message/$(POST)"
+
+RUNID:=02fb8245-31ef-48bc-b732-bcd69e962612
+get-workflow:
+	curl -X GET "http://localhost:$(APIPORT)/workflow/$(RUNID)"
+
+get-workflows:
+	curl -X GET "http://localhost:$(APIPORT)/workflows/"
+
+test:
+	node test.js "$(APIPORT)" "$(POST)"
 
 clean:
 	rm -f output.*.json
