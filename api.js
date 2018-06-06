@@ -6,7 +6,7 @@ const { Pool, Client } = require('pg')
 
 // ~~~~~~~ CONFIG ~~~~~~ //
 const port = process.argv[2]; // 5000
-console.log('>>> starting API on port: ' + port)
+console.log('>>> API listening on port: ' + port)
 app.use(bodyParser.json())
 
 
@@ -64,7 +64,7 @@ app.route('/message/')
         var runName = message.runName;
         var runStatus = message.runStatus;
         var utcTime = message.utcTime;
-        console.log('>>> API recieved message POST');
+        // console.log('>>> API recieved message POST');
         // just call res.end(), or show as string on web
         res.send(JSON.stringify(message, null));
 

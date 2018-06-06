@@ -42,18 +42,26 @@ setup-db: stop-db
 
 # stop the db if its running
 stop-db:
-	@echo ">>> Shutting down any currently running PostgresSQL databse..."
-	-pg_ctl -D "$(PGDIR)" stop
+	@echo ">>> Shutting down any currently running PostgresSQL databse at $(PGDIR)..."
+	@-set -x; pg_ctl -D "$(PGDIR)" stop
 
-# make sure the db is running; start it if not in port 127.0.0.1:5433
+# make sure the db is running; start it if not, on port 127.0.0.1:5433
 check-db: stop-db
-	@echo ">>> Checking status of PostgresSQL databse..."
-	-if [ ! "$$(psql -c "SELECT 1" -d nflistener > /dev/null 2>&1 ; echo $$?)" -eq 0 ]; then pg_ctl -D "$(PGDIR)" -o "-p $(PGPORT)" -U "$(PGUSER)" start 2>&1 ; fi
+	@echo ">>> Checking status of PostgresSQL database at $(PGDIR), port: $(PGPORT), user: $(PGUSER)..."
+	@-set -x; if [ ! "$$(psql -c "SELECT 1" -d '$(PGDATABASE)' > /dev/null 2>&1 ; echo $$?)" -eq 0 ]; then pg_ctl -D "$(PGDIR)" -o "-p $(PGPORT)" -U "$(PGUSER)" start 2>&1 ; fi
 
-db-contents: check-db
+start-db:
+	@echo ">>> Starting PostgresSQL database $(PGDATABASE) at $(PGDIR), port: $(PGPORT), user: $(PGUSER), if not already running..." ; \
+	if [ ! "$$(pg_isready -q -d '$(PGDATABASE)' -p '$(PGPORT)'; echo $$?)" -eq 0 ]; then \
+	echo ">>> Database not running, starting database server..." ; \
+	pg_ctl -D "$(PGDIR)" -o "-p $(PGPORT)" -U "$(PGUSER)" start 2>&1 ; \
+	else echo ">>> Database already running" ; \
+	fi
+
+db-contents: start-db
 	psql -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -c 'SELECT * FROM messages;'
 
-db-workflows: check-db
+db-workflows: start-db
 	psql -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -c 'SELECT DISTINCT runid,runname FROM messages;'
 
 db-dump:
@@ -65,7 +73,7 @@ nflistener.dump:
 db-restore: nflistener.dump
 	pg_restore -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -d "$(PGDATABASE)" --no-owner nflistener.dump
 
-listen: check-db
+listen: start-db
 	@export PGUSER="$(PGUSER)"; \
 	export PGHOST="$(PGHOST)"; \
 	export PGPASSWORD="$(PGPASSWORD)"; \
@@ -80,16 +88,16 @@ listen: check-db
 	echo ">>> Killing API process $${pid}" ; \
 	kill "$${pid}"
 
+# launch the API in the background before launching the web server
+# TODO: come up with a better way to wait for the API to initialize before starting the server
 server:
-	@export PGUSER="$(PGUSER)"; \
-	export PGHOST="$(PGHOST)"; \
-	export PGPASSWORD="$(PGPASSWORD)"; \
-	export PGDATABASE="$(PGDATABASE)"; \
-	export PGPORT="$(PGPORT)"; \
+	@$(MAKE) api & \
+	sleep 1 ; \
 	echo ">>> Starting web server, view at http://localhost:$(SERVERPORT)" ; \
 	node server.js "$(SERVERPORT)" "$(APIURL)" "$(APIPORT)"
 
-node: check-db
+# start Node with db connection configs
+node: start-db
 	export PGUSER="$(PGUSER)"; \
 	export PGHOST="$(PGHOST)"; \
 	export PGPASSWORD="$(PGPASSWORD)"; \
@@ -97,13 +105,16 @@ node: check-db
 	export PGPORT="$(PGPORT)"; \
 	node
 
-api: check-db
-	export PGUSER="$(PGUSER)"; \
+# launch the API process
+api: start-db
+	@export PGUSER="$(PGUSER)"; \
 	export PGHOST="$(PGHOST)"; \
 	export PGPASSWORD="$(PGPASSWORD)"; \
 	export PGDATABASE="$(PGDATABASE)"; \
 	export PGPORT="$(PGPORT)"; \
-	node api.js "$(APIPORT)"
+	node api.js "$(APIPORT)" & pid="$$!" ; \
+	echo ">>> Started API on background process $${pid}" ; \
+	wait "$${pid}"
 
 DATAFILE:=test/data.json
 post-message:

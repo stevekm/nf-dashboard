@@ -40,6 +40,6 @@ The app will be viewable in your web browser at http://localhost:8080
 
 - Node.js and npm (`brew install node`)
 
-- PostgresSQL (`brew install postgres`)
+- PostgresSQL 9.3+ (`brew install postgres`)
 
 Tested on macOS 10.10 - 10.12
