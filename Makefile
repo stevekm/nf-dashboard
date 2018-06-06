@@ -73,6 +73,7 @@ nflistener.dump:
 db-restore: nflistener.dump
 	pg_restore -h "$(PGHOST)" -p "$(PGPORT)" -U "$(PGUSER)" -d "$(PGDATABASE)" --no-owner nflistener.dump
 
+# start the API and listen for POST messages from nextflow
 listen: start-db
 	@export PGUSER="$(PGUSER)"; \
 	export PGHOST="$(PGHOST)"; \
@@ -83,10 +84,14 @@ listen: start-db
 	pid="$$!" ; \
 	echo ">>> Started API listening with process id $${pid}" ; \
 	echo ">>> Starting Nextflow process" ; \
-	( cd nfbroadcast && \
-	./launch.sh run main.nf -with-weblog "http://localhost:$(APIPORT)/message" ; ) ; \
+	$(MAKE) launch-nextflow ; \
 	echo ">>> Killing API process $${pid}" ; \
 	kill "$${pid}"
+
+# run Nextflow with http POST messages enabled
+launch-nextflow:
+	cd nfbroadcast && \
+	./launch.sh run main.nf -with-weblog "http://localhost:$(APIPORT)/message"
 
 # launch the API in the background before launching the web server
 # TODO: come up with a better way to wait for the API to initialize before starting the server
