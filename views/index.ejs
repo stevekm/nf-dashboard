@@ -6,13 +6,36 @@
     <title>Nextflow Dashboard</title>
 </head>
 
+<script>
+var ws = new WebSocket('ws://localhost:40510');
+
+// event emmited when connected
+ws.onopen = function () {
+    console.log('websocket is connected ...')
+
+    // sending a send event to websocket server
+    ws.send('connected')
+}
+
+// event emmited when receiving message
+ws.onmessage = function (ev) {
+    console.log(ev);
+    document.getElementById("numworkflows").innerHTML = `Running workflows: ${ev.data}`;
+}
+</script>
+
 <body>
+
     <div>
         <h1>Nextflow Dashboard</h1>
+
+        <div id="numworkflows">
+        </div>
         <form method="post" action="/start", target="start">
           <input type="submit", value="Start New Workflow">
           <iframe src='about:blank', name="start", style="width: 0; height: 0; border: 0; border: none; position: absolute;"></iframe>
         </form>
+
         <p>Available Workflows:</p>
         <div >
           <!-- loop over runs and render them -->

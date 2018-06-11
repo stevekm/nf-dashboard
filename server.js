@@ -7,6 +7,34 @@ const serverPort = process.argv[2]; // 8080
 const apiUrl = process.argv[3]; // http://localhost
 const apiPort = process.argv[4]; // 5000
 
+var numRunningWorkflows = 0;
+
+// ~~~~~ web socket ~~~~~ //
+// var WebSocketServer = require('ws').Server,
+//   wss = new WebSocketServer({port: 40510})
+// wss.on('connection', function (ws) {
+//   ws.on('message', function (message) {
+//     console.log('web socket received: %s', message)
+//   })
+//
+//   // setInterval(
+//   //   () => ws.send(`${new Date()}`),
+//   //   1000
+//   // )
+// })
+
+
+// const WebSocket = require('ws');
+// const ws = new WebSocket('ws://www.host.com/path', {
+//   perMessageDeflate: false
+// });
+const WebSocket = require('ws');
+const ws = new WebSocket('ws://localhost:40510');
+
+ws.on('open', function open() {
+  ws.send('something');
+});
+
 // ~~~~~~~ WEB SERVER ~~~~~~ //
 // viewed at http://localhost:8080
 app.set('view engine', 'ejs');
@@ -51,6 +79,9 @@ app.post('/start', function(req, res){
 	// console.log(req.body);
 	console.log('>>> Starting new workflow...')
 	const child = spawn('make', ['launch-nextflow', `APIPORT=${apiPort}`])
+	numRunningWorkflows = numRunningWorkflows + 1;
+	ws.send(`${numRunningWorkflows}`)
+	console.log(`${numRunningWorkflows} running workflows`);
 
 	child.stdout.on('data', (data) => {
 	  console.log(`${data}`);
@@ -62,7 +93,9 @@ app.post('/start', function(req, res){
 
 	child.on('exit', function (code, signal) {
 	console.log('>>> Child workflow process exited with ' + `code ${code} and signal ${signal}`);
+	numRunningWorkflows = numRunningWorkflows - 1;
 	  res.sendStatus(200);
+	  ws.send(`${numRunningWorkflows}`)
 	});
 });
 
