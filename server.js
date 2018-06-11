@@ -6,17 +6,17 @@ const { spawn } = require('child_process');
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
 
-const serverPort = process.argv[2]; // 8080
-const apiUrl = process.argv[3]; // http://localhost
-const apiPort = process.argv[4]; // 5000
-
-
 // ~~~~~ GLOBALS ~~~~~ //
+const serverPort = process.env.SERVERPORT || process.argv[2] || 8080;
+const apiUrl = process.env.APIURL || process.argv[3] || "http://localhost";
+const apiPort = process.env.APIPORT || process.argv[4] || 5000;
+const wsPort = process.env.WSPORT || process.argv[5] || 40510;
+
 var numRunningWorkflows = 0;
 
 // ~~~~~ web socket server ~~~~~ //
 var WebSocketServer = require('ws').Server
-const wss = new WebSocketServer({port: 40510})
+const wss = new WebSocketServer({port: wsPort})
 
 wss.on('connection', function (ws) {
     ws.on('message', function (message) {

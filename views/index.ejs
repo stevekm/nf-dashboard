@@ -11,17 +11,26 @@ var ws = new WebSocket('ws://localhost:40510');
 
 // event emmited when connected
 ws.onopen = function () {
-    console.log('websocket is connected ...')
+    console.log('websocket is connected ...');
 
     // sending a send event to websocket server
-    ws.send('connected')
-}
+    ws.send('connected');
+};
 
 // event emmited when receiving message
 ws.onmessage = function (ev) {
     console.log(ev);
-    document.getElementById("numworkflows").innerHTML = `Running workflows: ${ev.data}`;
-}
+    var numworkflows = Number(ev.data);
+    console.log(numworkflows);
+    var message;
+    if(numworkflows > 0){
+        message = `Running workflows: ${numworkflows}`;
+    } else {
+        message = 'No Running Workflows...';
+    };
+
+    document.getElementById("numworkflows").innerHTML = `${message}`;
+};
 </script>
 
 <body>

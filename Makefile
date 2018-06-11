@@ -7,6 +7,7 @@ PGPORT=5433
 APIPORT:=5000
 APIURL:=http://localhost
 SERVERPORT:=8080
+WSPORT:=40510
 .PHONY: test
 
 all: install
@@ -98,8 +99,12 @@ launch-nextflow:
 server:
 	@$(MAKE) api & \
 	sleep 1 ; \
-	echo ">>> Starting web server, view at http://localhost:$(SERVERPORT)" ; \
-	node server.js "$(SERVERPORT)" "$(APIURL)" "$(APIPORT)"
+	export SERVERPORT="$(SERVERPORT)" ; \
+	export APIURL="$(APIURL)" ; \
+	export APIPORT="$(APIPORT)" ; \
+	export WSPORT="$(WSPORT)" ; \
+	echo ">>> Starting web server, view at http://localhost:$${SERVERPORT}" ; \
+	node server.js
 
 # start Node with db connection configs
 node: start-db
