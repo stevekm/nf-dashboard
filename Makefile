@@ -97,6 +97,7 @@ launch-nextflow:
 # launch the API in the background before launching the web server
 # TODO: come up with a better way to wait for the API to initialize before starting the server
 server:
+	-killall node
 	@$(MAKE) api & \
 	sleep 1 ; \
 	export SERVERPORT="$(SERVERPORT)" ; \

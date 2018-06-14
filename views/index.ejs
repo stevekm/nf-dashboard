@@ -17,19 +17,14 @@ ws.onopen = function () {
     ws.send('connected');
 };
 
-// event emmited when receiving message
+// display the workflow state sent over websocket
 ws.onmessage = function (ev) {
-    console.log(ev);
-    var numworkflows = Number(ev.data);
-    console.log(numworkflows);
-    var message;
-    if(numworkflows > 0){
-        message = `Running workflows: ${numworkflows}`;
-    } else {
-        message = 'No Running Workflows...';
-    };
-
-    document.getElementById("numworkflows").innerHTML = `${message}`;
+    var data = JSON.parse(ev.data);
+    var numworkflows = Number(data.num);
+    var workflowState = data.state;
+    var message = `${workflowState}`;
+    console.log('got socket message')
+    document.getElementById("workflow-status").innerHTML = `${message}`;
 };
 </script>
 
@@ -38,7 +33,8 @@ ws.onmessage = function (ev) {
     <div>
         <h1>Nextflow Dashboard</h1>
 
-        <div id="numworkflows">
+        <div id="workflow-status">
+            <!-- default message: -->
             No Running Workflows...
         </div>
         <form method="post" action="/start", target="start">

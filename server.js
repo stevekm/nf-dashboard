@@ -13,6 +13,16 @@ const apiPort = process.env.APIPORT || process.argv[4] || 5000;
 const wsPort = process.env.WSPORT || process.argv[5] || 40510;
 
 var numRunningWorkflows = 0;
+function makeWorkflowState(n){
+    var state;
+    if(Number(n) < 1){
+        state = {"num": n, "state": "No running workflows"}
+    } else {
+        state = {"num": n, "state": `${n} running workflows`}
+    };
+    return(state);
+};
+
 
 // ~~~~~ web socket server ~~~~~ //
 var WebSocketServer = require('ws').Server
@@ -25,12 +35,12 @@ wss.on('connection', function (ws) {
 
     eventEmitter.on("start-workflow", function(){
         numRunningWorkflows = numRunningWorkflows + 1;
-        ws.send(`${numRunningWorkflows}`);
+        ws.send(JSON.stringify(makeWorkflowState(numRunningWorkflows)));
     });
 
     eventEmitter.on("end-workflow", function(){
         numRunningWorkflows = numRunningWorkflows - 1;
-        ws.send(`${numRunningWorkflows}`);
+        ws.send(JSON.stringify(makeWorkflowState(numRunningWorkflows)));
     });
 });
 
