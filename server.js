@@ -48,6 +48,7 @@ wss.on('connection', function (ws) {
 // ~~~~~~~ WEB SERVER ~~~~~~ //
 // viewed at http://localhost:8080
 app.set('view engine', 'ejs');
+app.use('/public', express.static('public'));
 
 // app home page
 app.get('/', function(req, res) {

@@ -2,3 +2,4 @@ nfbroadcast
 node_modules
 output.*.json
 nflistener.dump
+.DS_Store
