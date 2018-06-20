@@ -4,7 +4,7 @@ var bodyParser = require('body-parser');
 var axios = require('axios')
 const { spawn } = require('child_process');
 var events = require('events');
-var eventEmitter = new events.EventEmitter();
+var workflowState = new events.EventEmitter();
 
 // ~~~~~ GLOBALS ~~~~~ //
 const serverPort = process.env.SERVERPORT || process.argv[2] || 8080;
@@ -12,35 +12,51 @@ const apiUrl = process.env.APIURL || process.argv[3] || "http://localhost";
 const apiPort = process.env.APIPORT || process.argv[4] || 5000;
 const wsPort = process.env.WSPORT || process.argv[5] || 40510;
 
-var numRunningWorkflows = 0;
-function makeWorkflowState(n){
+workflowState.numWorkflows = 0;
+workflowState.addWorkflow = function(){
+    this.numWorkflows += 1
+};
+workflowState.removeWorkflow = function(){
+    this.numWorkflows -= 1
+};
+workflowState.state = function(){
     var state;
-    if(Number(n) < 1){
-        state = {"num": n, "state": "No running workflows"}
+    if(Number(this.numWorkflows) < 1 ){
+        state = {"num": this.numWorkflows, "state": "No running workflows"}
     } else {
-        state = {"num": n, "state": `${n} running workflows`}
+        state = {"num": this.numWorkflows, "state": `${this.numWorkflows} running workflows`}
     };
     return(state);
 };
-
 
 // ~~~~~ web socket server ~~~~~ //
 var WebSocketServer = require('ws').Server
 const wss = new WebSocketServer({port: wsPort})
 
 wss.on('connection', function (ws) {
+    // send server state upon initial connection
+    ws.send(JSON.stringify(workflowState.state()));
+
     ws.on('message', function (message) {
         console.log('web socket received: %s', message);
-    })
-
-    eventEmitter.on("start-workflow", function(){
-        numRunningWorkflows = numRunningWorkflows + 1;
-        ws.send(JSON.stringify(makeWorkflowState(numRunningWorkflows)));
     });
 
-    eventEmitter.on("end-workflow", function(){
-        numRunningWorkflows = numRunningWorkflows - 1;
-        ws.send(JSON.stringify(makeWorkflowState(numRunningWorkflows)));
+    workflowState.on("start-workflow", function(){
+        if (ws.readyState === ws.OPEN) {
+            ws.send(JSON.stringify(workflowState.state()));
+        } else {
+            console.log('Workflow started but socket not connected. Workflow state: ' + JSON.stringify(workflowState.state()));
+            ws.close();
+        };
+    });
+
+    workflowState.on("end-workflow", function(){
+        if (ws.readyState === ws.OPEN) {
+            ws.send(JSON.stringify(workflowState.state()));
+        } else {
+            console.log('Workflow ended but socket not connected. Workflow state: ' + JSON.stringify(workflowState.state()));
+            ws.close();
+        };
     });
 });
 
@@ -90,7 +106,8 @@ app.post('/start', function(req, res){
     // console.log(req.body);
     console.log('>>> Starting new workflow...');
     const child = spawn('make', ['launch-nextflow', `APIPORT=${apiPort}`]);
-    eventEmitter.emit("start-workflow");
+    workflowState.emit("start-workflow");
+    workflowState.addWorkflow();
 
     child.stdout.on('data', (data) => {
         console.log(`${data}`);
@@ -102,8 +119,9 @@ app.post('/start', function(req, res){
 
     child.on('exit', function (code, signal) {
     console.log('>>> Child workflow process exited with ' + `code ${code} and signal ${signal}`);
+        workflowState.emit("end-workflow");
+        workflowState.removeWorkflow();
         res.sendStatus(200);
-        eventEmitter.emit("end-workflow");
     });
 });
 
